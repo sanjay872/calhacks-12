@@ -1,22 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import History from "../components/history";
-
-class Contract {
-  constructor(title: string, date: string, status: string) {
-    this.title = title;
-    this.date = date;
-    this.status = status;
-  }
-}
-
-const demoUser = {
-  pastContracts: [
-    new Contract("Contract 1", "2025-01-01", "active"),
-    new Contract("Contract 2", "2025-01-02", "completed"),
-    new Contract("Contract 3", "2025-01-03", "pending"),
-  ]
-}
+import History from "../components/history.tsx";
+import { demoUser } from "../App.tsx"
 
 function Home() {
   const navigate = useNavigate();
@@ -35,12 +20,15 @@ function Home() {
       
       {
         demoUser.pastContracts.length > 0 && (
-          demoUser.pastContracts.map(History)
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-12 mt-12 justify-items-center">
+            {demoUser.pastContracts.map((contract, index) => (
+              <History key={index} contract={contract} />
+            ))}
+          </div>
         )
       }
     </div>
 
-   
   
   );
 }
