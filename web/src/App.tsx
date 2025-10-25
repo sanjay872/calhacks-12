@@ -5,32 +5,16 @@ import SignUp from "./pages/signup";
 import Home from "./pages/home";
 import Contract from "./pages/contract";
 import "./App.css";
+import CreateContract from "./pages/create-contract";
 
 function App() {
   return (
+    
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-
-        {/* Protected routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/contract"
-          element={
-            <ProtectedRoute>
-              <Contract />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/contract" element={<Contract />} />
+        <Route path="/create-contract" element={<CreateContract />} />
       </Routes>
     </BrowserRouter>
   );
