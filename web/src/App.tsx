@@ -28,6 +28,8 @@ function App() {
             <CreateContract />
           </ProtectedRoute>
         } />
+        <Route path="/" element={<Home />} />
+        <Route path="/contract" element={<Contract />} />
       </Routes>
     </BrowserRouter>
   );
