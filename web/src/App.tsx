@@ -9,15 +9,29 @@ import CreateContract from "./pages/create-contract";
 
 function App() {
   return (
-    
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/contract" element={<Contract />} />
-        <Route path="/create-contract" element={<CreateContract />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/contract" element={
+          <ProtectedRoute>
+            <Contract />
+          </ProtectedRoute>
+        } />
+        <Route path="/create-contract" element={
+          <ProtectedRoute>
+            <CreateContract />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   );
 }
+
 
 export default App;
