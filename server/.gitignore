@@ -4,7 +4,7 @@ __pycache__/
 
 # Ignore virtual environments
 venv/
-.env/
+.env
 .venv/
 
 # Ignore Chroma and cache data
