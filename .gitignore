@@ -1,0 +1,15 @@
+# Environment variables
+.env
+.env.local
+
+# AWS Credentials
+*.pem
+*.key
+credentials
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
