@@ -1,22 +1,22 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import SignIn from "./pages/signin";
+import SignUp from "./pages/signup";
 import Home from "./pages/home";
-import "./App.css";
 import ViewContract from "./pages/view-contract";
-import CreateContract from "./pages/create-contract";
 import { LucideFolderMinus } from "lucide-react";
 
+import "./App.css";
+import CreateContract from "./pages/create-contract"; 
 class Contract {
-  constructor(title: string, date: string, signatory: string, text: string) {
+  constructor(title: string, date: string, signatory: string, overleafFile: string) {
     this.title = title
     this.date = date
     this.signatory = signatory
-    this.text = text
+    this.overleafFile = overleafFile
   }
 }
+
 
 function App() {
   return (
@@ -33,10 +33,10 @@ function App() {
 
 export const demoUser = {
   pastContracts: [
-    new Contract("Contract 1", "2025-01-01", "Chase", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-    new Contract("Contract 2", "2025-01-02", "Amazon", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-    new Contract("Contract 3", "2025-01-03", "Wells Fargo", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-    new Contract("Contract 4", "2025-01-04", "Intel", "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+    new Contract("Contract 1", "2025-01-01", "Chase", '/demo/contract.tex'),
+    new Contract("Contract 2", "2025-01-02", "Amazon", "/demo/contract.tex"),
+    new Contract("Contract 3", "2025-01-03", "Wells Fargo", "/demo/contract.tex"),
+    new Contract("Contract 4", "2025-01-04", "Intel", "/demo/contract.tex")
   ]
 }
 /* export const demoUser = {

@@ -1,0 +1,7 @@
+fastapi 
+pdfplumber 
+dotenv
+boto3
+chromadb
+openai
+requests
