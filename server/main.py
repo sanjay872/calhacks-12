@@ -8,6 +8,11 @@ from typing import Union
 import tempfile
 import os
 
+from fastapi.responses import StreamingResponse, JSONResponse
+from typing import Generator
+import json
+from utils.stream_runner import run_pipeline_stream
+
 from awsS3 import S3Client
 from dotenv import load_dotenv
 
@@ -27,21 +32,21 @@ app.add_middleware(
 
 s3_client = S3Client()
 
-@app.get("/riskanalysis")
-def read_root(payload: dict= Body(...)):
-    companyName=payload.get("companyName","")
-    criticality=payload.get("criticality","Medium")
-    return riskAnalysisGraph(companyName,criticality)
+# @app.get("/riskanalysis")
+# def read_root(payload: dict= Body(...)):
+#     companyName=payload.get("companyName","")
+#     criticality=payload.get("criticality","Medium")
+#     return riskAnalysisGraph(companyName,criticality)
 
-@app.get("/search")
-def read_item(payload: dict= Body()):
-    return get_company_data(payload.get('companyName',""))
+# @app.get("/search")
+# def read_item(payload: dict= Body()):
+#     return get_company_data(payload.get('companyName',""))
 
-@app.post("/chat")
-def chatBot(payload: dict= Body(...)):
-    userId=payload.get("userId")
-    userMessage=payload.get("userMessage")
-    return handle_user_message(userId,userMessage)
+# @app.post("/chat")
+# def chatBot(payload: dict= Body(...)):
+#     userId=payload.get("userId")
+#     userMessage=payload.get("userMessage")
+#     return handle_user_message(userId,userMessage)
 
 
 
@@ -103,3 +108,84 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Body(...), co
             "message": "Failed to upload file"
         }
 
+def sse_event(data: dict) -> str:
+    """Format data as Server-Sent Events"""
+    return f"data: {json.dumps(data)}\n\n"
+
+@app.get("/")
+def read_root():
+    return {"message": "Risk Analysis API", "version": "1.0"}
+
+@app.post("/riskanalysis")
+def risk_analysis(payload: dict = Body(...)):
+    """Non-streaming risk analysis endpoint"""
+    companyName = payload.get("companyName", "")
+    criticality = payload.get("criticality", "Medium")
+    return riskAnalysisGraph(companyName, criticality)
+
+@app.post("/search")
+def search_company(payload: dict = Body(...)):
+    """Search for company data"""
+    return get_company_data(payload.get('companyName', ""))
+
+@app.post("/chat")
+def chatBot(payload: dict = Body(...)):
+    """Non-streaming chat endpoint"""
+    userId = payload.get("userId")
+    userMessage = payload.get("userMessage")
+    return handle_user_message(userId, userMessage)
+
+@app.post("/chat/stream")
+async def chat_stream(payload: dict = Body(...)):
+    """
+    Streaming chat endpoint with real-time progress updates.
+    
+    Request body:
+    {
+      "user_id": "sanjay123",
+      "message": "analyze Tesla with high criticality"
+    }
+    
+    Returns: text/event-stream with progress events
+    """
+    
+    user_id = payload.get("user_id", "anonymous")
+    message = payload.get("message", "")
+    
+    if not message:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Message is required"}
+        )
+    
+    def event_generator() -> Generator[str, None, None]:
+        """Generate SSE events from the pipeline"""
+        try:
+            for event in run_pipeline_stream(user_id, message):
+                yield sse_event(event)
+                
+            # Send completion signal
+            yield sse_event({"type": "done"})
+            
+        except Exception as e:
+            import traceback
+            yield sse_event({
+                "type": "error",
+                "message": str(e),
+                "traceback": traceback.format_exc()
+            })
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"  # Disable buffering in nginx
+        }
+    )
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
