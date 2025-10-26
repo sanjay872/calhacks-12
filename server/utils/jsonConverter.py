@@ -3,6 +3,9 @@ import json
 import re
 from openai import OpenAI
 
+from dotenv import load_dotenv
+load_dotenv()  # loads variables from .env into environment
+
 # Initialize once globally
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
