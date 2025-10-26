@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Left from "./left";
 import Right from "./right";
 import { Send } from "lucide-react";
@@ -8,15 +8,20 @@ function CreateContract() {
     Array<{ role: "user" | "assistant"; content: string }>
   >([]);
   const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(50); // Percentage
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSend = () => {
-    if (inputValue.trim()) {
+    if (inputValue.trim() && !loading) {
       setMessages([...messages, { role: "user", content: inputValue }]);
 
       setInputValue("");
 
       // Simulate a response (no actual API call)
       setTimeout(() => {
+        setLoading(true);
         setMessages((prev) => [
           ...prev,
           {
@@ -25,6 +30,7 @@ function CreateContract() {
               "I'm here to help you create a contract. Please describe what kind of contract you need.",
           },
         ]);
+        setLoading(false);
       }, 500);
     }
   };
@@ -36,6 +42,40 @@ function CreateContract() {
     }
   };
 
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+    // Constrain between 33.33% and 66.67%
+    const constrainedWidth = Math.max(33.33, Math.min(66.67, newLeftWidth));
+    setLeftWidth(constrainedWidth);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    } else {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
+
   return (
     <>
       <div className="flex flex-col h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ">
@@ -45,8 +85,8 @@ function CreateContract() {
             <div className="w-full max-w-3xl">
               {/* Welcome Content */}
               <div className="text-center mb-12">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-500 text-white mb-6">
-                  <span className="text-3xl">✦</span>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#D4AF37] text-white mb-6">
+                  <span className="text-3xl">◈</span>
                 </div>
                 <h1 className="text-4xl font-medium text-gray-800 dark:text-gray-100 mb-4">
                   Hi, how can I help you create a contract?
@@ -69,7 +109,7 @@ function CreateContract() {
                       onKeyDown={handleKeyPress}
                       placeholder="How can I help you today?"
                       rows={1}
-                      className="w-full px-4 py-3 pr-12 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 dark:focus:ring-orange-400 resize-none overflow-hidden shadow-sm"
+                      className="w-full px-4 py-3 pr-12 rounded-2xl border border-[#D4AF37] dark:border-[#D4AF37] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] dark:focus:ring-[#D4AF37] resize-none overflow-hidden shadow-sm"
                       style={{ minHeight: "48px", maxHeight: "200px" }}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -101,14 +141,27 @@ function CreateContract() {
           </div>
         ) : (
           <div className="flex flex-col h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-            <div className="flex-1 flex overflow-hidden">
-              <Left
-                initialValue={inputValue}
-                messages={messages}
-                setMessages={setMessages}
-                setInitialValue={setInputValue}
+            <div ref={containerRef} className="flex-1 flex overflow-hidden relative">
+              <div style={{ width: `${leftWidth}%` }} className="h-full">
+                <Left
+                  initialValue={inputValue}
+                  messages={messages}
+                  setMessages={setMessages}
+                  setInitialValue={setInputValue}
+                />
+              </div>
+              
+              {/* Draggable Divider */}
+              <div
+                onMouseDown={handleMouseDown}
+                className={`w-2 bg-gray-300 dark:bg-gray-600 hover:bg-[#D4AF37] cursor-col-resize transition-colors ${
+                  isDragging ? "bg-[#D4AF37]" : ""
+                }`}
               />
-              <Right />
+              
+              <div style={{ width: `${100 - leftWidth}%` }} className="h-full">
+                <Right />
+              </div>
             </div>
           </div>
         )}
