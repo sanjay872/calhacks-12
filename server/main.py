@@ -2,6 +2,7 @@ from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from graphs.riskAnalysisGraph import riskAnalysisGraph
 from utils.webScraper import get_company_data
+
 app = FastAPI(title="AI Service", version="1.0")
 
 app.add_middleware(

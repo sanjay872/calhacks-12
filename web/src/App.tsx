@@ -6,6 +6,7 @@ import Home from "./pages/home";
 import ViewContract from "./pages/view-contract";
 import { LucideFolderMinus } from "lucide-react";
 
+
 import "./App.css";
 import CreateContract from "./pages/create-contract"; 
 class Contract {
@@ -20,12 +21,13 @@ class Contract {
 
 function App() {
   return (
-    
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/view-contract" element={<ViewContract />} />
         <Route path="/create-contract" element={<CreateContract />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   );
