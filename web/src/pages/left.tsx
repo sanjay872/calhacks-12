@@ -1,30 +1,59 @@
-import { useState } from "react";
-import { Send } from "lucide-react";
-import { IoIosSend } from "react-icons/io";
+import { useRef, useEffect, useState } from "react";
 import { MdSend } from "react-icons/md";
 
-function Left() {
-  const [messages, setMessages] = useState<
-    Array<{ role: "user" | "assistant"; content: string }>
-  >([]);
-  const [inputValue, setInputValue] = useState("");
+interface LeftProps {
+  initialValue: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  setMessages: (
+    messages:
+      | Array<{ role: "user" | "assistant"; content: string }>
+      | ((
+          prev: Array<{ role: "user" | "assistant"; content: string }>
+        ) => Array<{ role: "user" | "assistant"; content: string }>)
+  ) => void;
+  setInitialValue: (initialValue: string) => void;
+}
+
+function Left({
+  initialValue,
+  messages,
+  setMessages,
+  setInitialValue,
+}: LeftProps) {
+  console.log(`props: initialValue = ${initialValue}`);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [length, setLength] = useState(messages.length);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSend = () => {
-    if (inputValue.trim()) {
-      setMessages([...messages, { role: "user", content: inputValue }]);
-      setInputValue("");
-
-      // Simulate a response (no actual API call)
-      setTimeout(() => {
+    if (initialValue.trim()) {
+      if (length === messages.length) {
+        return;
+      } else {
         setMessages((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content:
-              "I'm here to help you create a contract. Please describe what kind of contract you need.",
-          },
+          { role: "user", content: initialValue },
         ]);
-      }, 500);
+        setLength(length + 1);
+        setInitialValue("");
+
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content:
+                "I'm here to help you create a contract. Please describe what kind of contract you need.",
+            },
+          ]);
+        }, 200);
+        setLength(length + 1);
+      }
     }
   };
 
@@ -78,7 +107,7 @@ function Left() {
                   >
                     {/* Avatar */}
                     <div
-                      className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm ${
+                      className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm ${
                         message.role === "user"
                           ? "bg-blue-500 text-white"
                           : "bg-orange-500 text-white"
@@ -102,6 +131,8 @@ function Left() {
                   </div>
                 </div>
               ))}
+              {/* Auto-scroll target */}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </div>
@@ -111,8 +142,8 @@ function Left() {
           <div className="flex flex-row items-center gap-3">
             {/* Text Input */}
             <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              value={initialValue}
+              onChange={(e) => setInitialValue(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Type your message..."
               rows={1}
@@ -128,8 +159,8 @@ function Left() {
             {/* Send Button */}
             <button
               onClick={handleSend}
-              disabled={!inputValue.trim()}
-              className="flex-shrink-0 p-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:bg-orange-500 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200"
+              disabled={!initialValue.trim()}
+              className="shrink-0 p-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:bg-orange-500 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200"
             >
               <MdSend size={20} color="white" />
             </button>
