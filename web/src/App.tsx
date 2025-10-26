@@ -4,56 +4,62 @@ import SignIn from "./pages/signin";
 import SignUp from "./pages/signup";
 import Home from "./pages/home";
 import ViewContract from "./pages/view-contract";
-import { LucideFolderMinus } from "lucide-react";
 import EditContract from "./pages/edit-contract";
 
 import "./App.css";
 import CreateContract from "./pages/create-contract";
-class Contract {
-  constructor(
-    title: string,
-    date: string,
-    signatory: string,
-    overleafFile: string
-  ) {
-    this.title = title;
-    this.date = date;
-    this.signatory = signatory;
-    this.overleafFile = overleafFile;
-  }
-}
+import { useState, useEffect } from "react";
 
 function App() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    console.log("User:", user);
+  }, [user]);
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/view-contract" element={<ViewContract />} />
-        <Route path="/create-contract" element={<CreateContract />} />
-        <Route path="/edit-contract" element={<EditContract />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        {/* Public Routes */}
+        <Route path="/signin" element={<SignIn setUser={setUser} />} />
+        <Route path="/signup" element={<SignUp setUser={setUser} />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/view-contract"
+          element={
+            <ProtectedRoute>
+              <ViewContract />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-contract"
+          element={
+            <ProtectedRoute>
+              <EditContract />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-contract"
+          element={
+            <ProtectedRoute>
+              <CreateContract />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 }
 
-export const demoUser = {
-  pastContracts: [
-    new Contract("Contract 1", "2025-01-01", "Chase", "/demo/contract.tex"),
-    new Contract("Contract 2", "2025-01-02", "Amazon", "/demo/contract.tex"),
-    new Contract(
-      "Contract 3",
-      "2025-01-03",
-      "Wells Fargo",
-      "/demo/contract.tex"
-    ),
-    new Contract("Contract 4", "2025-01-04", "Intel", "/demo/contract.tex"),
-    new Contract("Contract 5", "2025-01-05", "Apple", "/demo/contract.tex"),
-    new Contract("Contract 6", "2025-01-06", "Microsoft", "/demo/contract.tex"),
-  ],
-};
-/* export const demoUser = {
-  pastContracts: []
-} */
 export default App;

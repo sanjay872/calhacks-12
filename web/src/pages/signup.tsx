@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { signUp } from "../services/auth";
 
-function SignUp() {
+function SignUp({ setUser }: { setUser: (user: any) => void }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,7 +68,9 @@ function SignUp() {
     }
 
     try {
-      await signUp(email, password, company);
+      const userCredential = await signUp(email, password, company);
+      console.log("User signed up:", userCredential.user);
+      setUser(userCredential.user);
       setSuccess(true);
 
       // Navigate to home after successful registration

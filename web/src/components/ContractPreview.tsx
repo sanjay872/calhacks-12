@@ -1,5 +1,13 @@
-import { useState, useEffect } from 'react';
-import { FileText, Calendar, User, X } from 'lucide-react';
+import { useState } from "react";
+import { FileText, Calendar, User, X } from "lucide-react";
+import { Document, Page } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+import { pdfjs } from "react-pdf";
+
+// Use local worker file instead of CDN
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 interface Contract {
   title: string;
@@ -14,25 +22,10 @@ interface ContractPreviewProps {
 }
 
 function ContractPreview({ contract, onClick }: ContractPreviewProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [latexContent, setLatexContent] = useState<string | null>(null);
-
-  // Load LaTeX content when component mounts
-  useEffect(() => {
-    const loadLatexContent = async () => {
-      try {
-        const response = await fetch(contract.overleafFile);
-        const text = await response.text();
-        setLatexContent(text);
-      } catch (error) {
-        console.error('Failed to load LaTeX file:', error);
-      }
-    };
-    
-    loadLatexContent();
-  }, [contract.overleafFile]);
+  const [pageNumber, setPageNumber] = useState<number>(1);
+  const [numPages, setNumPages] = useState<number>();
 
   const handleClick = () => {
     setShowModal(true);
@@ -50,26 +43,32 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
     }, 700); // Match the animation duration
   };
 
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+    setNumPages(numPages);
+  }
+
   return (
     <>
-      <div 
+      <div
         className="group cursor-pointer transition-all duration-200 hover:shadow-lg w-full"
         onClick={handleClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         {/* Preview Area */}
         <div className="relative bg-white border-2 border-[#003366] rounded-lg overflow-hidden aspect-square w-full">
           {/* Image Preview */}
-          <img 
-            src="/src/demo/gray_square.jpg" 
+          <img
+            src="/src/demo/gray_square.jpg"
             alt={contract.title}
             className="w-full h-full object-cover"
           />
-          
+
           {/* Hover Overlay */}
-          <div className={`absolute inset-0 bg-[#003366] bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center`}>
-            <div className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+          <div
+            className={`absolute inset-0 bg-[#003366] bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center`}
+          >
+            <div
+              className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200`}
+            >
               <div className="bg-white rounded-full p-2 shadow-lg">
                 <FileText size={20} className="text-[#D4AF37]" />
               </div>
@@ -80,12 +79,18 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
         {/* Label Section */}
         <div className="px-3 py-2 group-hover:bg-[#E5E7EB] rounded-lg transition-colors">
           {/* Document Title */}
-          <div className="text-sm font-medium text-[#111827] mb-1 truncate group-hover:text-[#003366] transition-colors" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
+          <div
+            className="text-sm font-medium text-[#111827] mb-1 truncate group-hover:text-[#003366] transition-colors"
+            style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+          >
             {contract.title}
           </div>
-          
+
           {/* Metadata */}
-          <div className="space-y-1" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>
+          <div
+            className="space-y-1"
+            style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}
+          >
             <div className="flex items-center text-xs text-[#111827]">
               <Calendar size={12} className="mr-1 text-[#D4AF37]" />
               <span className="truncate">{contract.date}</span>
@@ -98,94 +103,78 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
         </div>
       </div>
 
-      {/* Modal for LaTeX Preview */}
+      {/* Modal for PDF Preview */}
       {showModal && (
-        <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 ${isClosing ? 'bg-black/0 duration-500 pointer-events-none' : 'bg-black/70 animate-in fade-in duration-200'}`}>
-          <div className={`bg-white rounded-lg shadow-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col border-4 border-[#003366] ${isClosing ? 'animate-out fade-out zoom-out-95 duration-700 opacity-0' : 'animate-in fade-in zoom-in-95 duration-300'}`}>
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-4 border-b-2 border-[#003366] bg-[#E5E7EB]">
-              <div>
-                <h2 className="text-xl font-semibold text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{contract.title}</h2>
-                <p className="text-sm text-[#111827]" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>{contract.date} • {contract.signatory}</p>
-              </div>
-              <button
-                onClick={closeModal}
-                className="p-2 hover:bg-white rounded-full transition-colors"
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-white/30 dark:bg-gray-900/30 ${
+            isClosing ? "animate-fade-out" : "animate-fade-in"
+          }`}
+          onClick={closeModal}
+        >
+          <div
+            className={`relative bg-white rounded-lg shadow-2xl max-w-4xl max-h-[90vh] overflow-auto ${
+              isClosing ? "animate-scale-out" : "animate-scale-in"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
+            >
+              <X size={20} className="text-gray-600" />
+            </button>
+
+            {/* PDF Document */}
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+                {contract.title}
+              </h2>
+              <Document
+                file="/Pro-bono.pdf"
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-gray-500">Loading PDF...</div>
+                  </div>
+                }
+                error={
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-red-500">Failed to load PDF</div>
+                  </div>
+                }
               >
-                <X size={24} className="text-[#D4AF37]" />
-              </button>
-            </div>
-            
-            {/* Modal Content - LaTeX Preview */}
-            <div className="flex-1 overflow-auto p-4 bg-white" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>
-              <div className="prose max-w-none text-[#111827]">
-                <h1 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Sample LaTeX File</h1>
-                <p><strong>Author:</strong> David P. Little</p>
-                
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Abstract</h2>
-                <p>This document represents the output from the file "sample.tex" once compiled using your favorite LaTeX compiler. This file should serve as a good example of the basic structure of a ".tex" file as well as many of the most basic commands needed for typesetting documents involving mathematical symbols and expressions.</p>
-                
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Lists</h2>
-                <ol>
-                  <li><strong>First Point (Bold Face)</strong></li>
-                  <li><em>Second Point (Italic)</em></li>
-                  <li><strong>Third Point (Large Font)</strong>
-                    <ol>
-                      <li><small>First Subpoint (Small Font)</small></li>
-                      <li><small>Second Subpoint (Tiny Font)</small></li>
-                      <li><strong>Third Subpoint (Huge Font)</strong></li>
-                    </ol>
-                  </li>
-                  <li>• Bullet Point (Sans Serif)</li>
-                  <li>○ Circle Point (Small Caps)</li>
-                </ol>
-                
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Equations</h2>
-                <h3 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Binomial Theorem</h3>
-                <p><strong>Theorem (Binomial Theorem):</strong> For any nonnegative integer n, we have</p>
-                <div className="text-center my-4">
-                  <code className="bg-[#E5E7EB] px-2 py-1 rounded border border-[#003366]">(1+x)^n = Σ(i=0 to n) C(n,i) x^i</code>
+                <Page
+                  pageNumber={pageNumber}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                />
+              </Document>
+
+              {/* Page Navigation */}
+              {numPages && numPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <button
+                    onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
+                    disabled={pageNumber <= 1}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-gray-700">
+                    Page {pageNumber} of {numPages}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setPageNumber(Math.min(numPages, pageNumber + 1))
+                    }
+                    disabled={pageNumber >= numPages}
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-orange-600 transition-colors"
+                  >
+                    Next
+                  </button>
                 </div>
-                
-                <h3 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Taylor Series</h3>
-                <p>The Taylor series expansion for the function e^x is given by</p>
-                <div className="text-center my-4">
-                  <code className="bg-[#E5E7EB] px-2 py-1 rounded border border-[#003366]">e^x = 1 + x + x²/2 + x³/6 + ... = Σ(n≥0) x^n/n!</code>
-                </div>
-                
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Tables</h2>
-                <table className="border-collapse border-2 border-[#003366] mx-auto">
-                  <thead>
-                    <tr className="bg-[#E5E7EB]">
-                      <th className="border border-[#003366] px-2 py-1 text-[#003366]">left justified</th>
-                      <th className="border border-[#003366] px-2 py-1 text-[#003366]">center</th>
-                      <th className="border border-[#003366] px-2 py-1 text-[#003366]">right justified</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-[#003366] px-2 py-1">1</td>
-                      <td className="border border-[#003366] px-2 py-1">3.14159</td>
-                      <td className="border border-[#003366] px-2 py-1">5</td>
-                    </tr>
-                    <tr className="bg-[#E5E7EB]">
-                      <td className="border border-[#003366] px-2 py-1">2.4678</td>
-                      <td className="border border-[#003366] px-2 py-1">3</td>
-                      <td className="border border-[#003366] px-2 py-1">1234</td>
-                    </tr>
-                    <tr>
-                      <td className="border border-[#003366] px-2 py-1">3.4678</td>
-                      <td className="border border-[#003366] px-2 py-1">6.14159</td>
-                      <td className="border border-[#003366] px-2 py-1">1239</td>
-                    </tr>
-                  </tbody>
-                </table>
-                
-                <div className="mt-8 text-center text-[#D4AF37] text-sm">
-                  <p>📄 LaTeX Document Preview</p>
-                  <p className="text-[#111827]">File: {contract.overleafFile}</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

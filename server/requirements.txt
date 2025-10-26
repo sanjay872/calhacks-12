@@ -8,3 +8,5 @@ openai
 pydantic
 python-dotenv
 bs4
+boto3
+python-multipart

@@ -29,9 +29,9 @@ class S3Client:
     
 
 
-s3_client = S3Client()
-files = s3_client.list_files('calhacks3.0')
-print(files)
+# s3_client = S3Client()
+# files = s3_client.list_files('calhacks3.0')
+# print(files)
 
 
 # SECURE: Use environment variables

@@ -38,7 +38,7 @@ function CreateContract() {
 
   return (
     <>
-      <div className="flex flex-col h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      <div className="flex flex-col h-screen bg-linear-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ">
         {messages.length === 0 ? (
           /* Welcome Screen with Centered Input */
           <div className="flex-1 flex flex-col items-center justify-center px-4">
