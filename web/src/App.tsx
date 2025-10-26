@@ -36,7 +36,9 @@ export const demoUser = {
     new Contract("Contract 1", "2025-01-01", "Chase", '/demo/contract.tex'),
     new Contract("Contract 2", "2025-01-02", "Amazon", "/demo/contract.tex"),
     new Contract("Contract 3", "2025-01-03", "Wells Fargo", "/demo/contract.tex"),
-    new Contract("Contract 4", "2025-01-04", "Intel", "/demo/contract.tex")
+    new Contract("Contract 4", "2025-01-04", "Intel", "/demo/contract.tex"),
+    new Contract("Contract 5", "2025-01-05", "Apple", "/demo/contract.tex"),
+    new Contract("Contract 6", "2025-01-06", "Microsoft", "/demo/contract.tex"),
   ]
 }
 /* export const demoUser = {

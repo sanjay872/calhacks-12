@@ -20,13 +20,14 @@ function History({ contracts, onContractClick }: HistoryProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 justify-items-center">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 justify-items-center auto-rows-max">
       {contracts.map((contract, index) => (
-        <ContractPreview 
-          key={index} 
-          contract={contract} 
-          onClick={handleContractClick}
-        />
+        <div key={index} className="w-full max-w-[400px]">
+          <ContractPreview 
+            contract={contract} 
+            onClick={handleContractClick}
+          />
+        </div>
       ))}
     </div>
   );
