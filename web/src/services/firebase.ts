@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -12,6 +13,7 @@ const firebaseConfig = {
   messagingSenderId: "536521843205",
   appId: "1:536521843205:web:6e4ffde796aea0155cb26c",
   measurementId: "G-CSS94V04JN",
+  databaseURL: "https://calhacks-bb6c1-default-rtdb.firebaseio.com/",
 };
 
 // Initialize Firebase
@@ -22,5 +24,8 @@ export const auth = getAuth(app);
 
 // Initialize Firestore
 export const db = getFirestore(app);
+
+// Initialize Realtime Database
+export const database = getDatabase(app);
 
 export default app;

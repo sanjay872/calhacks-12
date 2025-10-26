@@ -15,6 +15,11 @@ export default defineConfig({
           src: "node_modules/@nutrient-sdk/viewer/dist/nutrient-viewer-lib",
           dest: "public/",
         },
+        {
+          // Copy PDF.js worker for react-pdf
+          src: "node_modules/pdfjs-dist/build/pdf.worker.min.mjs",
+          dest: "public/",
+        },
       ],
       hook: "buildStart",
     }),

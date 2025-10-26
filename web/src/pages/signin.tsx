@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { signIn } from "../services/auth";
 
-function SignIn() {
+function SignIn({ setUser }: { setUser: (user: any) => void }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +16,10 @@ function SignIn() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      const userCredential = await signIn(email, password);
+      console.log("User signed in:", userCredential.user);
+      
+      setUser(userCredential.user);
       // Navigate to home after successful login
       navigate("/");
     } catch (err: any) {
