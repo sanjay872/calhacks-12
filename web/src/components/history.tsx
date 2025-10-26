@@ -1,15 +1,33 @@
-function History(contract) {
+import ContractPreview from './ContractPreview';
+
+interface Contract {
+  title: string;
+  date: string;
+  signatory: string;
+  overleafFile: string;
+}
+
+interface HistoryProps {
+  contracts: Contract[];
+  onContractClick?: (contract: Contract) => void;
+}
+
+function History({ contracts, onContractClick }: HistoryProps) {
+  const handleContractClick = (contract: Contract) => {
+    if (onContractClick) {
+      onContractClick(contract);
+    }
+  };
+
   return (
-    <div className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold text-lg">{contract.title}</h3>
-          <p className="text-gray-600 text-sm">Created: {contract.date}</p>
-        </div>
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {contract.status}
-        </span>
-      </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 justify-items-center">
+      {contracts.map((contract, index) => (
+        <ContractPreview 
+          key={index} 
+          contract={contract} 
+          onClick={handleContractClick}
+        />
+      ))}
     </div>
   );
 }
