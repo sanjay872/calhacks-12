@@ -3,10 +3,14 @@ import History from "../components/history.tsx";
 import { demoUser } from "../data/demoData";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
+import { useState } from "react";
+import Contract from "../data/demoData.ts";
+import { listFiles } from "@/services/backend.ts";
 
 function Home() {
   const navigate = useNavigate();
   const { user, userData } = useAuth();
+  const [previousContracts, setPreviousContracts] = useState<Contract[]>([]);
 
   // Log the user UID for testing - always available when auto-signed in
   useEffect(() => {
@@ -16,6 +20,14 @@ function Home() {
       console.log("✅ User Data:", userData);
     }
   }, [user, userData]);
+
+  useEffect(() => {
+    if (user) {
+      listFiles(user.uid).then((data) => {
+        console.log("✅ Files:", data);
+      });
+    }
+  }, [user]);
 
   return (
     <div className="w-full bg-[#E5E7EB] min-h-screen">
@@ -68,7 +80,7 @@ function Home() {
           </button>
         </div>
 
-        {demoUser.pastContracts.length > 0 && (
+        {previousContracts.length > 0 ? (
           <div className="mt-8 bg-white rounded-lg p-4 shadow-md">
             <h2
               className="text-3xl font-semibold text-[#003366] mb-4"
@@ -84,6 +96,10 @@ function Home() {
                 // navigate(`/view-contract/${contract.title}`);
               }}
             />
+          </div>
+        ) : (
+            <div>
+              Create your first contract
           </div>
         )}
       </div>

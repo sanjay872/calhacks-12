@@ -16,6 +16,7 @@ class Contract {
     this.overleafFile = overleafFile;
   }
 }
+export default Contract;
 
 export const demoUser = {
   pastContracts: [

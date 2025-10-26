@@ -46,12 +46,26 @@ def chatBot(payload: dict= Body(...)):
 
 
 @app.get("/list_files")
-def list_files():
-    files = s3_client.list_files('calhacks3.0')
-    return {"files": files}
+def list_files_endpoint(user_id: str = None):
+    """
+    List files for a specific user
+    Query param: user_id - User's UID to filter files
+    Example: /list_files?user_id=abc123
+    """
+    files = s3_client.list_files('calhacks3.0', uid=user_id)
+    return {"files": files, "user_id": user_id, "count": len(files)}
+
+
+
 
 @app.post("/upload_file")
-async def upload_file(file: UploadFile = File(...), user_id: str = Body(...)):
+async def upload_file(file: UploadFile = File(...), user_id: str = Body(...), contract_name: str = Body(...), contract_date: str = Body(...), contract_signatory: str = Body(...)):
+    """
+    Upload a file to S3 under user's UID folder
+    Form data:
+    - file: The file to upload
+    - user_id: User's UID
+    """
     try:
         # Create a temporary file to save the upload
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
@@ -60,11 +74,9 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Body(...)):
             temp_file.write(content)
             temp_file_path = temp_file.name
         
-        # Upload to S3
-        file_name = f"{user_id}/{file.filename}"
-        
-        print(f"Uploading file {file_name} to S3")
-        s3_client.upload_file(temp_file_path, 'calhacks3.0', file_name)
+        # Upload to S3 with user_id as prefix (uses the updated method)
+        print(f"Uploading file {file.filename} for user {user_id}")
+        s3_path = s3_client.upload_file(temp_file_path, 'calhacks3.0', file.filename, uid=user_id)
         
         # Clean up temporary file
         os.unlink(temp_file_path)
@@ -72,13 +84,22 @@ async def upload_file(file: UploadFile = File(...), user_id: str = Body(...)):
         return {
             "success": True,
             "file_name": file.filename,
+            "s3_path": s3_path,
             "file_type": file.content_type,
             "file_size": len(content),
-            "message": "File uploaded successfully to S3"
+            "user_id": user_id,
+            "message": f"File uploaded successfully to S3 at {s3_path}"
         }
+        
+        
+        
+        
+        
     except Exception as e:
+        print(f"Error uploading file: {str(e)}")
         return {
             "success": False,
             "error": str(e),
             "message": "Failed to upload file"
         }
+
