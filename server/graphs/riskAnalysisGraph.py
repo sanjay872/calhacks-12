@@ -17,7 +17,6 @@ class RiskState(dict):
 def init_node(state: RiskState) -> RiskState:
     return state
 
-
 def fetch_external_data_node(state: RiskState) -> RiskState:
     print(f"Fetching data for {state}")
 

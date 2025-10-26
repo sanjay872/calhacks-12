@@ -2,7 +2,7 @@ from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 from graphs.riskAnalysisGraph import riskAnalysisGraph
 from utils.webScraper import get_company_data
-
+from graphs.contractbot import handle_user_message
 app = FastAPI(title="AI Service", version="1.0")
 
 app.add_middleware(
@@ -22,3 +22,9 @@ def read_root(payload: dict= Body(...)):
 @app.get("/search")
 def read_item(payload: dict= Body()):
     return get_company_data(payload.get('companyName',""))
+
+@app.post("/chat")
+def chatBot(payload: dict= Body(...)):
+    userId=payload.get("userId")
+    userMessage=payload.get("userMessage")
+    return handle_user_message(userId,userMessage)
