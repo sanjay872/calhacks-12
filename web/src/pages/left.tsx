@@ -1,186 +1,156 @@
-import { useRef, useEffect, useState, useCallback } from "react";
-import { MdSend } from "react-icons/md";
+import { useRef, useEffect } from "react";
+import { MessageSquare, Brain, Send, Loader2 } from "lucide-react";
 
 interface LeftProps {
-  initialValue: string;
-  messages: Array<{ role: "user" | "assistant"; content: string }>;
-  setMessages: (
-    messages:
-      | Array<{ role: "user" | "assistant"; content: string }>
-      | ((
-          prev: Array<{ role: "user" | "assistant"; content: string }>
-        ) => Array<{ role: "user" | "assistant"; content: string }>)
-  ) => void;
-  setInitialValue: (initialValue: string) => void;
+  messages: Array<{
+    role: "user" | "assistant";
+    content: string;
+    mode?: string;
+  }>;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  isProcessing: boolean;
+  onSend: () => void;
 }
 
 function Left({
-  initialValue,
   messages,
-  setMessages,
-  setInitialValue,
+  inputValue,
+  setInputValue,
+  isProcessing,
+  onSend,
 }: LeftProps) {
-  console.log(`props: initialValue = ${initialValue}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [length, setLength] = useState(messages.length);
-  const MAX_CHARS = 10000;
-
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Optimized textarea resize handler
-  const handleTextareaResize = useCallback(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
-    }
-  }, []);
-
-  const handleSend = () => {
-    if (initialValue.trim()) {
-      if (length === messages.length) {
-        return;
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { role: "user", content: initialValue },
-        ]);
-        setLength(length + 1);
-        setInitialValue("");
-
-        // Reset textarea height
-        if (textareaRef.current) {
-          textareaRef.current.style.height = "40px";
-        }
-
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              role: "assistant",
-              content:
-                "I'm here to help you create a contract. Please describe what kind of contract you need.",
-            },
-          ]);
-        }, 200);
-        setLength(length + 1);
+  const formatMessage = (content: string) => {
+    return content.split("\n").map((line, i) => {
+      if (line.startsWith("**") && line.endsWith("**")) {
+        return (
+          <p key={i} className="font-bold mb-2">
+            {line.slice(2, -2)}
+          </p>
+        );
+      } else if (line.startsWith("• ")) {
+        return (
+          <li key={i} className="ml-4 mb-1">
+            {line.slice(2)}
+          </li>
+        );
+      } else if (line.trim()) {
+        return (
+          <p key={i} className="mb-2">
+            {line}
+          </p>
+        );
       }
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+      return <br key={i} />;
+    });
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white dark:bg-gray-900 justify-center items-center">
-      <div className="w-[95%] h-[95%] border-2 rounded-4xl flex flex-col overflow-hidden">
-        {/* Chat Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-            Contract Assistant
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Ask me anything about your contract
-          </p>
-        </div>
-
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#D4AF37] text-white mb-4">
-                <span className="text-2xl">◈</span>
-              </div>
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-100 mb-2">
-                Start a conversation
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Type your message below to begin
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`flex gap-2 max-w-[80%] ${
-                      message.role === "user" ? "flex-row-reverse" : "flex-row"
-                    }`}
-                  >
-                    {/* Avatar */}
-                    <div
-                      className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm ${
-                        message.role === "user"
-                          ? "bg-blue-500 text-white"
-                          : "bg-[#D4AF37] text-white"
-                      }`}
-                    >
-                      {message.role === "user" ? "U" : "◈"}
-                    </div>
-
-                    {/* Message Content */}
-                    <div
-                      className={`px-3 py-2 rounded-2xl ${
-                        message.role === "user"
-                          ? "bg-[#003366] text-white"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-                      }`}
-                    >
-                      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
-                        message.role === "user" ? "break-all" : "break-words"
-                      }`}>
-                        {message.content}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {/* Auto-scroll target */}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </div>
-
-        {/* Input Area - Fixed at Bottom */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex flex-row items-center gap-3">
-            {/* Text Input */}
-            <textarea
-              ref={textareaRef}
-              value={initialValue}
-              onChange={(e) => setInitialValue(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder="Type your message..."
-              rows={1}
-              maxLength={MAX_CHARS}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[#D4AF37] dark:border-[#D4AF37] bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] dark:focus:ring-[#D4AF37] resize-none text-sm custom-scrollbar"
-              style={{ minHeight: "40px", maxHeight: "120px" }}
-              onInput={handleTextareaResize}
-            />
-
-            {/* Send Button */}
-            <button
-              onClick={handleSend}
-              disabled={!initialValue.trim()}
-              className="shrink-0 p-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:bg-orange-500 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200"
-            >
-              <MdSend size={20} color="white" />
-            </button>
+    <div className="flex flex-col h-full bg-white">
+      {/* Header */}
+      <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white/20 rounded-lg">
+            <MessageSquare className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold">Contract Risk Analyzer</h2>
+            <p className="text-xs text-blue-100">Ask me about contract risks</p>
           </div>
         </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="w-20 h-20 bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
+              <Brain className="w-10 h-10 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Start a Conversation
+            </h3>
+            <p className="text-sm text-gray-600 max-w-md">
+              Ask me to analyze company risks or general questions about
+              contracts
+            </p>
+            <div className="mt-4 space-y-2 w-full max-w-md">
+              <button
+                onClick={() =>
+                  setInputValue("Analyze Tesla with high criticality")
+                }
+                className="block w-full px-4 py-2 text-sm text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 transition-colors"
+              >
+                💡 Analyze Tesla with high criticality
+              </button>
+              <button
+                onClick={() => setInputValue("What can you do?")}
+                className="block w-full px-4 py-2 text-sm text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 transition-colors"
+              >
+                💬 What can you do?
+              </button>
+            </div>
+          </div>
+        )}
+
+        {messages.map((message, idx) => (
+          <div
+            key={idx}
+            className={`flex ${
+              message.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${
+                message.role === "user"
+                  ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-900"
+              }`}
+            >
+              <div className="text-sm">{formatMessage(message.content)}</div>
+            </div>
+          </div>
+        ))}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && onSend()}
+            placeholder="Ask for risk analysis or general questions..."
+            disabled={isProcessing}
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-200 disabled:cursor-not-allowed transition-all"
+          />
+          <button
+            onClick={onSend}
+            disabled={!inputValue.trim() || isProcessing}
+            className="px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+          >
+            {isProcessing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                <span>Send</span>
+              </>
+            )}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-2 px-1">
+          Press Enter to send • Shift+Enter for new line
+        </p>
       </div>
     </div>
   );

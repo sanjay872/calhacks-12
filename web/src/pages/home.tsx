@@ -6,11 +6,19 @@ import { useEffect } from "react";
 import { useState } from "react";
 import Contract from "../data/demoData.ts";
 import { listFiles } from "@/services/backend.ts";
+import {
+  FileText,
+  Plus,
+  BarChart3,
+  Shield,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
 
 function Home() {
   const navigate = useNavigate();
   const { user, userData } = useAuth();
-  const [previousContracts, setPreviousContracts] = useState<Contract[]>([]);
+  const [previousContracts] = useState<Contract[]>([]);
 
   // Log the user UID for testing - always available when auto-signed in
   useEffect(() => {
@@ -30,64 +38,44 @@ function Home() {
   }, [user]);
 
   return (
-    <div className="w-full bg-[#E5E7EB] min-h-screen">
-      <div className="container mx-auto p-6">
-        {/* Debug Info - Remove in production */}
-        {user && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>User UID:</strong> {user.uid}
-            </p>
-            <p className="text-sm text-blue-800">
-              <strong>Email:</strong> {user.email}
-            </p>
-            {userData?.company && (
-              <p className="text-sm text-blue-800">
-                <strong>Company:</strong> {userData.company}
+    <div className="w-full bg-linear-to-br from-slate-50 to-blue-50 min-h-screen">
+      <div className="container mx-auto p-6 max-w-7xl">
+        {/* Hero Header */}
+        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-8 mb-8 text-white">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Contract Dashboard</h1>
+              <p className="text-blue-100">
+                {user?.email
+                  ? `Welcome back, ${user.email.split("@")[0]}`
+                  : "Manage and analyze your contracts"}
               </p>
-            )}
-          </div>
-        )}
+            </div>
 
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1
-              className="text-3xl font-bold mb-2 text-[#003366]"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
+            <button
+              onClick={() => navigate("/create-contract")}
+              className="flex items-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-200"
             >
-              Dashboard
-            </h1>
-            <p
-              className="text-[#111827]"
-              style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}
-            >
-              Welcome to your contract management system
-            </p>
+              <Plus className="w-5 h-5" />
+              <span>Create Contract</span>
+            </button>
           </div>
-
-          <button
-            onClick={() => navigate("/create-contract")}
-            className="text-white px-6 py-3 rounded-lg transition-all duration-200 font-medium"
-            style={{ backgroundColor: "#003366" }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#D4AF37")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#003366")
-            }
-          >
-            Create Contract
-          </button>
         </div>
 
-        {previousContracts.length > 0 ? (
-          <div className="mt-8 bg-white rounded-lg p-4 shadow-md">
-            <h2
-              className="text-3xl font-semibold text-[#003366] mb-4"
-              style={{ fontFamily: "'Source Sans 3', sans-serif" }}
-            >
-              Your Contracts
-            </h2>
+        {/* Stats Cards */}
+     
+
+        {/* Contracts Section */}
+        {previousContracts.length > 0 || demoUser.pastContracts.length > 0 ? (
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FileText className="w-5 h-5 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Your Contracts
+              </h2>
+            </div>
             <History
               contracts={demoUser.pastContracts}
               onContractClick={(contract) => {
@@ -98,8 +86,45 @@ function Home() {
             />
           </div>
         ) : (
-            <div>
-              Create your first contract
+          <div className="bg-white rounded-xl shadow-sm p-12 border border-gray-100 text-center">
+            <div className="w-20 h-20 bg-linear-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-10 h-10 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Contracts Yet
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Get started by creating your first contract
+            </p>
+            <button
+              onClick={() => navigate("/create-contract")}
+              className="inline-flex items-center gap-2 bg-linear-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Create Contract</span>
+            </button>
+          </div>
+        )}
+
+        {/* Debug Info - Remove in production */}
+        {user && (
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-xs font-semibold text-blue-900 mb-2">
+              Debug Info (Remove in production)
+            </p>
+            <div className="space-y-1 text-xs text-blue-800">
+              <p>
+                <strong>User UID:</strong> {user.uid}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+              {userData?.company && (
+                <p>
+                  <strong>Company:</strong> {userData.company}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
