@@ -16,9 +16,8 @@ interface ContractPreviewProps {
 function ContractPreview({ contract, onClick }: ContractPreviewProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [latexContent, setLatexContent] = useState<string | null>(null);
-  
-    var s 
 
   // Load LaTeX content when component mounts
   useEffect(() => {
@@ -37,13 +36,18 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
 
   const handleClick = () => {
     setShowModal(true);
+    setIsClosing(false);
     if (onClick) {
       onClick(contract);
     }
   };
 
   const closeModal = () => {
-    setShowModal(false);
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowModal(false);
+      setIsClosing(false);
+    }, 700); // Match the animation duration
   };
 
   return (
@@ -76,7 +80,7 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
         {/* Label Section */}
         <div className="px-3 py-2 group-hover:bg-[#E5E7EB] rounded-lg transition-colors">
           {/* Document Title */}
-          <div className="text-sm font-medium text-[#111827] mb-1 truncate group-hover:text-[#003366] transition-colors" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <div className="text-sm font-medium text-[#111827] mb-1 truncate group-hover:text-[#003366] transition-colors" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>
             {contract.title}
           </div>
           
@@ -96,12 +100,12 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
 
       {/* Modal for LaTeX Preview */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col border-4 border-[#003366]">
+        <div className={`fixed inset-0 flex items-center justify-center z-50 p-4 ${isClosing ? 'bg-black/0 duration-500 pointer-events-none' : 'bg-black/70 animate-in fade-in duration-200'}`}>
+          <div className={`bg-white rounded-lg shadow-xl w-full max-w-6xl h-full max-h-[90vh] flex flex-col border-4 border-[#003366] ${isClosing ? 'animate-out fade-out zoom-out-95 duration-700 opacity-0' : 'animate-in fade-in zoom-in-95 duration-300'}`}>
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b-2 border-[#003366] bg-[#E5E7EB]">
               <div>
-                <h2 className="text-xl font-semibold text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>{contract.title}</h2>
+                <h2 className="text-xl font-semibold text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>{contract.title}</h2>
                 <p className="text-sm text-[#111827]" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>{contract.date} • {contract.signatory}</p>
               </div>
               <button
@@ -115,13 +119,13 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
             {/* Modal Content - LaTeX Preview */}
             <div className="flex-1 overflow-auto p-4 bg-white" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>
               <div className="prose max-w-none text-[#111827]">
-                <h1 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Sample LaTeX File</h1>
+                <h1 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Sample LaTeX File</h1>
                 <p><strong>Author:</strong> David P. Little</p>
                 
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Abstract</h2>
+                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Abstract</h2>
                 <p>This document represents the output from the file "sample.tex" once compiled using your favorite LaTeX compiler. This file should serve as a good example of the basic structure of a ".tex" file as well as many of the most basic commands needed for typesetting documents involving mathematical symbols and expressions.</p>
                 
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Lists</h2>
+                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Lists</h2>
                 <ol>
                   <li><strong>First Point (Bold Face)</strong></li>
                   <li><em>Second Point (Italic)</em></li>
@@ -136,20 +140,20 @@ function ContractPreview({ contract, onClick }: ContractPreviewProps) {
                   <li>○ Circle Point (Small Caps)</li>
                 </ol>
                 
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Equations</h2>
-                <h3 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Binomial Theorem</h3>
+                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Equations</h2>
+                <h3 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Binomial Theorem</h3>
                 <p><strong>Theorem (Binomial Theorem):</strong> For any nonnegative integer n, we have</p>
                 <div className="text-center my-4">
                   <code className="bg-[#E5E7EB] px-2 py-1 rounded border border-[#003366]">(1+x)^n = Σ(i=0 to n) C(n,i) x^i</code>
                 </div>
                 
-                <h3 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Taylor Series</h3>
+                <h3 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Taylor Series</h3>
                 <p>The Taylor series expansion for the function e^x is given by</p>
                 <div className="text-center my-4">
                   <code className="bg-[#E5E7EB] px-2 py-1 rounded border border-[#003366]">e^x = 1 + x + x²/2 + x³/6 + ... = Σ(n≥0) x^n/n!</code>
                 </div>
                 
-                <h2 className="text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Tables</h2>
+                <h2 className="text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Tables</h2>
                 <table className="border-collapse border-2 border-[#003366] mx-auto">
                   <thead>
                     <tr className="bg-[#E5E7EB]">

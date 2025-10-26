@@ -16,7 +16,7 @@ function Home() {
       <div className="container mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-[#003366]" style={{ fontFamily: "'Playfair Display', serif" }}>Dashboard</h1>
+            <h1 className="text-3xl font-bold mb-2 text-[#003366]" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Dashboard</h1>
             <p className="text-[#111827]" style={{ fontFamily: "'Zalando Sans SemiExpanded', sans-serif" }}>Welcome to your contract management system</p>
           </div>
           
@@ -34,7 +34,7 @@ function Home() {
         {
           demoUser.pastContracts.length > 0 && (
             <div className="mt-8 bg-white rounded-lg p-4 shadow-md">
-              <h2 className="text-3xl font-semibold text-[#003366] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Your Contracts</h2>
+              <h2 className="text-3xl font-semibold text-[#003366] mb-4" style={{ fontFamily: "'Source Sans 3', sans-serif" }}>Your Contracts</h2>
               <History
                 contracts={demoUser.pastContracts} 
                 onContractClick={(contract) => {
